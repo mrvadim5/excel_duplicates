@@ -1,0 +1,49 @@
+import pandas as pd
+#import openpyxl
+
+
+# Load the Excel file (same folder as script)
+df = pd.read_excel("book1-titles-07302025.xlsx")
+
+# Convert 'publication_title' and 'oclc_number' to lowercase strings (handling NaNs)
+titles = df["publication_title"].astype(str).str.lower()
+oclc_nums = df["oclc_number"].astype(str).str.lower()
+
+# Combine and find case-insensitive duplicates
+combined = pd.concat([titles, oclc_nums])
+duplicates = combined[combined.duplicated(keep=False)].unique()
+
+# Filter rows where the lowercase version of title or oclc_number is in the duplicates list
+mask = titles.isin(duplicates) | oclc_nums.isin(duplicates)
+filtered_df = df[mask]
+
+# Determine match reasons
+#reasons = []
+#for title, oclc in zip(titles, oclc_nums):
+#    title_match = title in duplicates
+#    oclc_match = oclc in duplicates
+#    if title_match and oclc_match:
+#        reasons.append("both match")
+#    elif title_match:
+#        reasons.append("publication_title match")
+#    elif oclc_match:
+#        reasons.append("oclc_number match")
+#    else:
+#        reasons.append("")
+
+# Add the duplicate reason column
+#df["duplicate_reason"] = reasons
+
+# Select only the desired columns (A to E)
+output_df = filtered_df[[
+    "publication_title",
+    "coverage_depth",
+    "publisher_name",
+    "oclc_collection_name",
+    "oclc_number"
+]]
+
+# Save the result to a new Excel file
+output_df.to_excel("duplicates_output.xlsx", index=False)
+
+print("Done. Output saved as 'duplicates_output.xlsx'.")
