@@ -1,0 +1,26 @@
+import pandas as pd
+
+# Load the spreadsheet
+input_file = 'book1-titles-07302025.xlsx'
+df = pd.read_excel(input_file)
+
+# === Step 1: Case-insensitive duplicates in Column A ===
+col_a = df.columns[0]
+normalized_a = df[col_a].astype(str).str.lower()
+duplicates_a = df[normalized_a.duplicated(keep=False)]
+duplicates_a = duplicates_a[df.columns[:5]]  # Keep columns A–E
+
+# === Step 2: Case-insensitive duplicates in Column E ===
+col_e = df.columns[4]
+normalized_e = df[col_e].astype(str).str.lower()
+duplicates_e = df[normalized_e.duplicated(keep=False)]
+duplicates_e = duplicates_e[df.columns[:5]]  # Keep columns A–E
+
+# === Write to new Excel file with two sheets ===
+output_file = 'duplicates_found_2sheets.xlsx'
+with pd.ExcelWriter(output_file, engine='openpyxl') as writer:
+    duplicates_a.to_excel(writer, index=False, sheet_name='Duplicates in A')
+    duplicates_e.to_excel(writer, index=False, sheet_name='Duplicates in E')
+
+print(f"Case-insensitive duplicates saved to '{output_file}' with two sheets.")
+
